@@ -15,5 +15,16 @@ export class ChooseplanController {
       data: plans,
     };
   }
+
+   @Post()
+  @ApiOperation({ summary: 'Add new plan' })
+  async addPlan(@Body() body: any) {
+    const result = await this.service.create(body);
+    return {
+      errCode: 0,
+      message: 'Plan added successfully',
+      data: result,
+    };
+  }
 }
 

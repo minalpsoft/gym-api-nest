@@ -14,7 +14,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
       password: '',
       database: 'gym_db',
       autoLoadEntities: true,
-      synchronize: true, 
+      synchronize: false, 
     }),
     ChooseplanModule,SubscriptionModule],
   controllers: [AppController],

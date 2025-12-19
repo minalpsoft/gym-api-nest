@@ -1,22 +1,57 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Plan } from './chooseplan.entity';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class ChooseplanService implements OnModuleInit {
-  constructor(
-    @InjectRepository(Plan)
-    private planRepo: Repository<Plan>,
-  ) {}
+  constructor(private dataSource: DataSource) {}
 
   async onModuleInit() {
-    const count = await this.planRepo.count();
-
- 
+    await this.dataSource.query(`
+      CREATE TABLE IF NOT EXISTS choose_plan (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(100) NOT NULL,
+        price DECIMAL(10,2) NOT NULL,
+        duration INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
   }
 
-  findAll() {
-    return this.planRepo.find();
+async create(body: any) {
+  const { planName, price, durationDays } = body;
+
+  if (!planName || !price || !durationDays) {
+    throw new Error('planName, price and durationDays are required');
   }
+
+  const result = await this.dataSource.query(
+    `
+    INSERT INTO choose_plan (name, price, duration)
+    VALUES (?, ?, ?)
+    `,
+    [planName, price, durationDays]
+  );
+
+  return {
+    planId: result.insertId,
+    planName,
+    price,
+    durationDays,
+  };
+}
+
+
+ async findAll() {
+  const plans = await this.dataSource.query(`
+    SELECT 
+      id,
+      name AS label,
+      price,
+      duration AS days
+    FROM choose_plan
+  `);
+
+  return plans;
+}
+
 }
