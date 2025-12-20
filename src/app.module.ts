@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { ChooseplanModule } from './chooseplan/chooseplan.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { PaymentModule } from './payment/payment.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [  TypeOrmModule.forRoot({
@@ -16,7 +18,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
       autoLoadEntities: true,
       synchronize: false, 
     }),
-    ChooseplanModule,SubscriptionModule],
+    ChooseplanModule,SubscriptionModule,PaymentModule,AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
