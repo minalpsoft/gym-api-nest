@@ -9,7 +9,7 @@ export class ChooseplanService implements OnModuleInit {
     await this.dataSource.query(`
       CREATE TABLE IF NOT EXISTS choose_plan (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(100) NOT NULL,
+        plan_name VARCHAR(100) NOT NULL,
         price DECIMAL(10,2) NOT NULL,
         duration INT NOT NULL,
         status VARCHAR(20) NOT NULL,
@@ -35,7 +35,7 @@ export class ChooseplanService implements OnModuleInit {
 
     const result = await this.dataSource.query(
       `
-      INSERT INTO choose_plan (name, price, duration, status)
+      INSERT INTO choose_plan (plan_name, price, duration, status)
       VALUES (?, ?, ?, ?)
       `,
       [planName, price, durationDays, normalizedStatus]
@@ -54,7 +54,7 @@ export class ChooseplanService implements OnModuleInit {
     return this.dataSource.query(`
       SELECT 
         id,
-        name AS label,
+        plan_name AS label,
         price,
         duration AS days
       FROM choose_plan

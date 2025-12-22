@@ -12,8 +12,16 @@ export class SubscriptionController {
     return this.service.create(body);
   }
 
-  @Get('active/:userId')
-  getActive(@Param('userId') userId: number) {
-    return this.service.getActiveByUser(userId);
-  }
+  @Get('active/:clientUserId')
+async getActive(@Param('clientUserId') clientUserId: string) {
+  console.log('API HIT WITH ID:', clientUserId);
+
+  const data = await this.service.getActiveByUser(
+    Number(clientUserId)
+  );
+
+  console.log('DB RESULT:', data);
+  return data;
+}
+
 }

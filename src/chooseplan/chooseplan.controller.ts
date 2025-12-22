@@ -5,7 +5,7 @@ import { ChooseplanService } from './chooseplan.service';
 @ApiTags('Plans')
 @Controller('chooseplan')
 export class ChooseplanController {
-  constructor(private readonly service: ChooseplanService) {}
+  constructor(private readonly service: ChooseplanService) { }
 
   @Get()
   async getPlans() {
@@ -16,7 +16,7 @@ export class ChooseplanController {
     };
   }
 
-   @Post()
+  @Post()
   @ApiOperation({ summary: 'Add new plan' })
   async addPlan(@Body() body: any) {
     const result = await this.service.create(body);

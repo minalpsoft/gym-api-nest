@@ -7,10 +7,10 @@ import { AuthService } from "./auth.service";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  async register(@Body() body: any) {
-    return this.authService.register(body);
-  }
+  // @Post('register')
+  // async register(@Body() body: any) {
+  //   return this.authService.register(body);
+  // }
 
   @Post('import-user')
   importUser(@Body() body: any) {

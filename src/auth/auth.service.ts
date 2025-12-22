@@ -25,46 +25,46 @@ export class AuthService implements OnModuleInit {
     `);
     }
 
-    async register(body: any) {
-        const {
-            clientUserId,
-            name,
-            email,
-            mobile,
-            password,
-            dob,
-            referralCode,
-            referenceId
-        } = body;
+    // async register(body: any) {
+    //     const {
+    //         clientUserId,
+    //         name,
+    //         email,
+    //         mobile,
+    //         password,
+    //         dob,
+    //         referralCode,
+    //         referenceId
+    //     } = body;
 
-        if (!clientUserId || !email || !password) {
-            throw new BadRequestException('Missing required fields');
-        }
+    //     if (!clientUserId || !email || !password) {
+    //         throw new BadRequestException('Missing required fields');
+    //     }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+    //     const hashedPassword = await bcrypt.hash(password, 10);
 
-        const result = await this.dataSource.query(
-            `
-    INSERT INTO users
-    (client_user_id, name, email, mobile, password, dob, referral_code, reference_id, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')
-    `,
-            [
-                clientUserId,
-                name,
-                email,
-                mobile,
-                hashedPassword,
-                dob || null,
-                referralCode || null,
-                referenceId || null
-            ]
-        );
+    //     const result = await this.dataSource.query(
+    //         `
+    // INSERT INTO users
+    // (client_user_id, name, email, mobile, password, dob, referral_code, reference_id, status)
+    // VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')
+    // `,
+    //         [
+    //             clientUserId,
+    //             name,
+    //             email,
+    //             mobile,
+    //             hashedPassword,
+    //             dob || null,
+    //             referralCode || null,
+    //             referenceId || null
+    //         ]
+    //     );
 
-        console.log('USER INSERT RESULT:', result);
+    //     console.log('USER INSERT RESULT:', result);
 
-        return { msg: 'Registration successful' };
-    }
+    //     return { msg: 'Registration successful' };
+    // }
 
     async importUser(body: any) {
         const {
@@ -127,7 +127,8 @@ export class AuthService implements OnModuleInit {
 
         return {
             msg: 'Login successful',
-            userId: user.id,
+            // userId: user.id,
+            clientUserId: user.client_user_id,
             name: user.name,
         };
     }
