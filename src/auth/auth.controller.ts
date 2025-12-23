@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 
@@ -7,14 +7,14 @@ import { AuthService } from "./auth.service";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // @Post('register')
-  // async register(@Body() body: any) {
-  //   return this.authService.register(body);
-  // }
+  @Get('user/:clientUserId')
+  getUser(@Param('clientUserId') clientUserId: string) {
+    return this.authService.getUserByClientId(clientUserId);
+  }
 
   @Post('import-user')
   importUser(@Body() body: any) {
-    console.log('IMPORT USER HIT:', body); 
+    // console.log('IMPORT USER HIT:', body); 
     return this.authService.importUser(body);
   }
 
@@ -22,5 +22,11 @@ export class AuthController {
   async login(@Body() body: any) {
     return this.authService.login(body);
   }
+
+  @Post('update-user')
+updateUser(@Body() body: any) {
+  return this.authService.updateUser(body);
+}
+
 
 }
