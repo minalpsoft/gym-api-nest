@@ -14,13 +14,13 @@ export class SubscriptionController {
 
   @Get('active/:clientUserId')
 async getActive(@Param('clientUserId') clientUserId: string) {
-  console.log('API HIT WITH ID:', clientUserId);
+  // console.log('API HIT WITH ID:', clientUserId);
 
   const data = await this.service.getActiveByUser(
     Number(clientUserId)
   );
 
-  console.log('DB RESULT:', data);
+  // console.log('DB RESULT:', data);
   return data;
 }
 

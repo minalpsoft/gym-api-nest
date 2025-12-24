@@ -28,5 +28,10 @@ updateUser(@Body() body: any) {
   return this.authService.updateUser(body);
 }
 
+@Post('reset-password')
+resetPassword(@Body() body: any) {
+  return this.authService.resetPassword(body);
+}
+
 
 }
