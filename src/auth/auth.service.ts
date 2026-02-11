@@ -51,9 +51,67 @@ export class AuthService implements OnModuleInit {
     `);
   }
 
+
+  // async importUser(body: any) {
+  //   try {
+  //     const { clientUserId, name, email, mobile, password, dob } = body;
+
+  //     const hashedPassword = password
+  //       ? await bcrypt.hash(password, 10)
+  //       : null;
+
+  //     const existing = await this.dataSource.query(
+  //       `SELECT id FROM users WHERE email = ? OR mobile = ?`,
+  //       [email, mobile]
+  //     );
+
+  //     if (existing.length) {
+  //       await this.dataSource.query(
+  //         `UPDATE users 
+  //        SET name = ?, email = ?, mobile = ?, password = ?, dob = ?
+  //        WHERE email = ? OR mobile = ?`,
+  //         [
+  //           name,
+  //           email,
+  //           mobile,
+  //           hashedPassword,
+  //           dob || null,
+  //           email,
+  //           mobile,
+  //         ]
+  //       );
+
+  //       return { msg: 'User updated in local DB' };
+  //     }
+
+  //     await this.dataSource.query(
+  //       `INSERT INTO users 
+  //      (client_user_id, name, email, mobile, password, dob)
+  //      VALUES (?, ?, ?, ?, ?, ?)`,
+  //       [
+  //         clientUserId,
+  //         name,
+  //         email,
+  //         mobile,
+  //         hashedPassword,
+  //         dob || null,
+  //       ]
+  //     );
+
+  //     return { msg: 'User imported successfully' };
+
+  //   } catch (err) {
+  //     console.error('IMPORT USER ERROR:', err);
+  //     throw new BadRequestException('Import user failed');
+  //   }
+  // }
+
   async importUser(body: any) {
     try {
       const { clientUserId, name, email, mobile, password, dob } = body;
+
+      const finalDob =
+        dob && dob !== '' && dob !== 'null' ? dob : null;
 
       const hashedPassword = password
         ? await bcrypt.hash(password, 10)
@@ -74,7 +132,7 @@ export class AuthService implements OnModuleInit {
             email,
             mobile,
             hashedPassword,
-            dob || null,
+            finalDob,
             email,
             mobile,
           ]
@@ -93,7 +151,7 @@ export class AuthService implements OnModuleInit {
           email,
           mobile,
           hashedPassword,
-          dob || null,
+          finalDob,
         ]
       );
 
@@ -105,42 +163,6 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  // async importUser(body: any) {
-  //     try {
-  //         const { clientUserId, name, email, mobile, password } = body;
-
-  //         const hashedPassword = await bcrypt.hash(password, 10);
-
-  //         const existing = await this.dataSource.query(
-  //             `SELECT id FROM users WHERE email = ? OR mobile = ?`,
-  //             [email, mobile]
-  //         );
-
-  //         if (existing.length) {
-  //             await this.dataSource.query(
-  //                 `UPDATE users 
-  //              SET name = ?, email = ?, mobile = ?, password = ?
-  //              WHERE email = ? OR mobile = ?`,
-  //                 [name, email, mobile, hashedPassword || null, email, mobile]
-  //             );
-
-  //             return { msg: 'User updated in local DB' };
-  //         }
-
-  //         await this.dataSource.query(
-  //             `INSERT INTO users 
-  //          (client_user_id, name, email, mobile, password)
-  //          VALUES (?, ?, ?, ?, ?)`,
-  //             [clientUserId, name, email, mobile, hashedPassword || null]
-  //         );
-
-  //         return { msg: 'User imported successfully' };
-
-  //     } catch (err) {
-  //         console.error('IMPORT USER ERROR:', err);
-  //         throw new BadRequestException('Import user failed');
-  //     }
-  // }
 
   async login(body: any) {
     const { email, password } = body;
