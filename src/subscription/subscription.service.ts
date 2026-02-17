@@ -4,7 +4,7 @@ import { CreateSubscriptionDto } from './dto/subscription.dto';
 
 @Injectable()
 export class SubscriptionService implements OnModuleInit {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 
   async onModuleInit() {
     await this.dataSource.query(`
@@ -23,121 +23,57 @@ export class SubscriptionService implements OnModuleInit {
     `);
   }
 
-  //  async create(body: CreateSubscriptionDto) {
-  //   const { clientUserId, planId, planName, price, durationDays } = body;
-
-  //   if (!clientUserId || !planId || !planName || !price || !durationDays) {
-  //     throw new BadRequestException('Missing required fields');
-  //   }
-
-  //   const startDate = new Date();
-  //   const endDate = new Date();
-  //   endDate.setDate(startDate.getDate() + durationDays);
-
-  //   const result = await this.dataSource.query(
-  //     `
-  //     INSERT INTO subscription
-  //     (client_user_id, plan_id, plan_name, price, duration, start_date, end_date)
-  //     VALUES (?, ?, ?, ?, ?, ?, ?)
-  //     `,
-  //     [
-  //       clientUserId,
-  //       planId,
-  //       planName,
-  //       price,
-  //       durationDays,
-  //       startDate,
-  //       endDate,
-  //     ]
-  //   );
-
-  //   return {
-  //     subscriptionId: result.insertId,
-  //     clientUserId,
-  //     planId,
-  //     planName,
-  //     startDate,
-  //     endDate,
-  //     status: 'active',
-  //   };
-  // }
-
   async create(body: CreateSubscriptionDto) {
-    const {
-      clientUserId,
-      planId,
-      planName,
-      price,
-      durationDays,
-    } = body;
+    const { clientUserId, planId, planName, price, durationDays } = body;
 
     if (!clientUserId || !planId || !planName || !price || !durationDays) {
       throw new BadRequestException('Missing required fields');
     }
 
-    // 🔴 STEP 1: EXPIRE EXISTING ACTIVE SUBSCRIPTIONS
+    // 🔴 Expire existing active subscriptions
     await this.dataSource.query(
-      `
-    UPDATE subscription
-    SET status = 'expired'
-    WHERE client_user_id = ?
-      AND status = 'active'
-    `,
+      `UPDATE subscription SET status = 'expired' WHERE client_user_id = ? AND status = 'active'`,
       [clientUserId]
     );
 
-    // 🟢 STEP 2: CREATE NEW SUBSCRIPTION
+    // 🟢 Create new subscription
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate() + Number(durationDays));
 
     const result = await this.dataSource.query(
-      `
-    INSERT INTO subscription
-    (client_user_id, plan_id, plan_name, price, duration, start_date, end_date)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    `,
-      [
-        clientUserId,
-        planId,
-        planName,
-        price,
-        durationDays,
-        startDate,
-        endDate,
-      ]
+      `INSERT INTO subscription
+        (client_user_id, plan_id, plan_name, price, duration, start_date, end_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [clientUserId, planId, planName, price, durationDays, startDate, endDate]
     );
 
+    // ✅ Return subscriptionId so frontend can use it
     return {
       subscriptionId: result.insertId,
       clientUserId,
       planId,
       planName,
+      price,
       startDate,
       endDate,
       status: 'active',
     };
   }
 
-
   async getActiveByUser(clientUserId: string) {
     return this.dataSource.query(
-      `
-      SELECT *
-      FROM subscription
-      WHERE client_user_id = ?
-        AND status = 'active'
-        AND end_date >= CURDATE()
-      `,
+      `SELECT * FROM subscription
+       WHERE client_user_id = ?
+         AND status = 'active'
+         AND end_date >= CURDATE()`,
       [clientUserId]
     );
   }
 
   async expireSubscriptions() {
-    return this.dataSource.query(`
-      UPDATE subscription
-      SET status = 'expired'
-      WHERE end_date < CURDATE()
-    `);
+    return this.dataSource.query(
+      `UPDATE subscription SET status = 'expired' WHERE end_date < CURDATE()`
+    );
   }
 }
