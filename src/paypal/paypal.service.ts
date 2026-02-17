@@ -7,9 +7,14 @@ export class PaypalService {
   private client: paypal.core.PayPalHttpClient;
 
   constructor() {
-    this.environment = new paypal.core.SandboxEnvironment(
-      // 'AXLJ3dGmvZw7tYHomNMPTtI9fIyQqKkjb7GDnGZ5jqRCsfioR4rBUq2MkXk8JrxV011nBFtzMjSzn7vB',
-      // 'EPv9EU8dcY7o0758MotsYo3i1r6uWssvMBY_nolwogEKArXVsnu9AOxsm3Mf0WTir1ILG6vKw9sZOvOf'
+    // this.environment = new paypal.core.SandboxEnvironment(
+    //   'AXLJ3dGmvZw7tYHomNMPTtI9fIyQqKkjb7GDnGZ5jqRCsfioR4rBUq2MkXk8JrxV011nBFtzMjSzn7vB',
+    //   'EPv9EU8dcY7o0758MotsYo3i1r6uWssvMBY_nolwogEKArXVsnu9AOxsm3Mf0WTir1ILG6vKw9sZOvOf'
+    // );
+
+    // this.client = new paypal.core.PayPalHttpClient(this.environment);
+
+      this.environment = new paypal.core.LiveEnvironment(
       'AQIyZiKMhSP0Cdo1D-2uWSIrQR2HVigkWlGJr7ND7SmyuaRMCH0I_k8q3jMImkBKQzBmjIHOADVqbULL',
       'EIfdwhhEbQpKb1anpd9gqHY-OewvLFS4e1OZP5WrDn2nvpTDhP2r74HGCEtaEOVmqTkbsO0HK1ewf0kh'
     );
