@@ -14,6 +14,25 @@ export class AuthController {
     return this.authService.getUserByClientId(clientUserId);
   }
 
+  @Post('validate-referral')
+  async validateReferral(
+    @Body() body: { code: string; planId: number; durationDays: number; refereeId: number }
+  ) {
+    const { code, planId, durationDays, refereeId } = body;
+    return this.authService.validateReferral(code, planId, durationDays, refereeId);
+  }
+
+
+@Post('apply-referral')
+applyReferral(@Body() body: any) {
+  return this.authService.applyReferral(
+    body.referrerId,
+    body.refereeId,
+    body.planId
+  );
+}
+
+
   // @Post('import-user')
   // importUser(@Body() body: any) {
   //   // console.log('IMPORT USER HIT:', body); 

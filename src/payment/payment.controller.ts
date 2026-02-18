@@ -36,5 +36,11 @@ export class PaymentController {
     );
   }
 
+  @Get('referrer-discount/:userId')
+getReferrerDiscount(@Param('userId') userId: number) {
+  return this.paymentService.getReferrerDiscount(Number(userId));
+}
+
+
 
 }

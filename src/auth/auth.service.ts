@@ -33,78 +33,39 @@ export class AuthService implements OnModuleInit {
     };
   }
 
+
   async onModuleInit() {
     await this.dataSource.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        client_user_id VARCHAR(50) NOT NULL,
-        name VARCHAR(100),
-        email VARCHAR(100) UNIQUE,
-        mobile VARCHAR(15) UNIQUE,
-        password VARCHAR(255),
-        dob DATE NULL,
-        referral_code VARCHAR(20),
-        reference_id VARCHAR(20),
-        status ENUM('active','inactive') DEFAULT 'active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    CREATE TABLE IF NOT EXISTS users (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      client_user_id VARCHAR(50) NOT NULL,
+      name VARCHAR(100),
+      email VARCHAR(100) UNIQUE,
+      mobile VARCHAR(15) UNIQUE,
+      password VARCHAR(255),
+      dob DATE NULL,
+      referral_code VARCHAR(20),
+      status ENUM('active','inactive') DEFAULT 'active',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+    await this.dataSource.query(`
+  CREATE TABLE IF NOT EXISTS referrals (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    referrer_user_id BIGINT NOT NULL,
+    referee_user_id BIGINT NOT NULL,
+    plan_id INT NOT NULL,
+    discount_applied BOOLEAN DEFAULT false,
+    referrer_rewarded BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_referee (referee_user_id)
+  )
+`);
+
+
   }
 
-
-  // async importUser(body: any) {
-  //   try {
-  //     const { clientUserId, name, email, mobile, password, dob } = body;
-
-  //     const hashedPassword = password
-  //       ? await bcrypt.hash(password, 10)
-  //       : null;
-
-  //     const existing = await this.dataSource.query(
-  //       `SELECT id FROM users WHERE email = ? OR mobile = ?`,
-  //       [email, mobile]
-  //     );
-
-  //     if (existing.length) {
-  //       await this.dataSource.query(
-  //         `UPDATE users 
-  //        SET name = ?, email = ?, mobile = ?, password = ?, dob = ?
-  //        WHERE email = ? OR mobile = ?`,
-  //         [
-  //           name,
-  //           email,
-  //           mobile,
-  //           hashedPassword,
-  //           dob || null,
-  //           email,
-  //           mobile,
-  //         ]
-  //       );
-
-  //       return { msg: 'User updated in local DB' };
-  //     }
-
-  //     await this.dataSource.query(
-  //       `INSERT INTO users 
-  //      (client_user_id, name, email, mobile, password, dob)
-  //      VALUES (?, ?, ?, ?, ?, ?)`,
-  //       [
-  //         clientUserId,
-  //         name,
-  //         email,
-  //         mobile,
-  //         hashedPassword,
-  //         dob || null,
-  //       ]
-  //     );
-
-  //     return { msg: 'User imported successfully' };
-
-  //   } catch (err) {
-  //     console.error('IMPORT USER ERROR:', err);
-  //     throw new BadRequestException('Import user failed');
-  //   }
-  // }
 
   async importUser(body: any) {
     try {
@@ -254,6 +215,74 @@ export class AuthService implements OnModuleInit {
 
     return { message: 'Password reset successfully' };
   }
+
+  async validateReferral(code: string, planId: number, durationDays: number, refereeId: number) {
+    if (durationDays !== 30) {
+      return { valid: false, msg: 'Referral discount applies only to 1-month plans' };
+    }
+
+    // find referrer by code
+    const referrer = await this.dataSource.query(
+      `SELECT client_user_id FROM users WHERE referral_code = ?`,
+      [code]
+    );
+
+    if (!referrer.length) {
+      return { valid: false, msg: 'Referral code invalid' };
+    }
+
+    const referrerId = Number(referrer[0].client_user_id);
+
+    // ❌ self referral
+    if (referrerId === refereeId) {
+      return { valid: false, msg: 'You cannot use your own referral code' };
+    }
+
+    // ❌ code already used by anyone
+    const codeUsed = await this.dataSource.query(
+      `SELECT id FROM referrals WHERE referrer_user_id = ?`,
+      [referrerId]
+    );
+
+    if (codeUsed.length) {
+      return { valid: false, msg: 'Referral code already used' };
+    }
+
+    return { valid: true, referrerId };
+  }
+
+  async applyReferral(referrerId: number, refereeId: number, planId: number) {
+
+    // ❌ referee already used any referral
+    const existing = await this.dataSource.query(
+      `SELECT id FROM referrals WHERE referee_user_id = ?`,
+      [refereeId]
+    );
+
+    if (existing.length) {
+      return { applied: false, msg: "Referral already used" };
+    }
+
+    // ✅ insert referral
+    const result = await this.dataSource.query(
+      `INSERT INTO referrals 
+     (referrer_user_id, referee_user_id, plan_id, discount_applied, referrer_rewarded)
+     VALUES (?, ?, ?, true, false)`,
+      [referrerId, refereeId, planId]
+    );
+
+    // ✅ NOW referrer becomes eligible for reward
+    await this.dataSource.query(
+      `UPDATE referrals 
+     SET referrer_rewarded = true 
+     WHERE id = ?`,
+      [result.insertId]
+    );
+
+    return { applied: true };
+  }
+
+
 
 
 
